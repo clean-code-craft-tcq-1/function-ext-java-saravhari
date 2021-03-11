@@ -67,7 +67,9 @@ public class BatteryManagementValidator {
 
 		if (value >= minVal && value <= (minVal + warningValue)) {
 			return (factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_LOW_WARNING));
-		} else if (value >= (maxVal - warningValue) && value <= maxVal) {
+		}
+
+		if (value >= (maxVal - warningValue) && value <= maxVal) {
 			return (factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_HIGH_WARNING));
 		}
 
