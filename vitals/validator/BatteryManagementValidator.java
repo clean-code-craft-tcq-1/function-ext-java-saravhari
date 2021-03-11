@@ -62,17 +62,25 @@ public class BatteryManagementValidator {
 	}
 
 	static String printEarlyWarning(String factorName, float maxVal, float minVal, float value) {
-		float warningValue = (float) ((maxVal * BatteryManagementFactor.TOLERANCE_PERCENTAGE)
+		float warningVal = (float) ((maxVal * BatteryManagementFactor.TOLERANCE_PERCENTAGE)
 				/ BatteryManagementFactor.MAX_PERCENTAGE);
 
-		if (value >= minVal && value <= (minVal + warningValue)) {
+		if (value <= lowTolerance(minVal, warningVal)) {
 			return (factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_LOW_WARNING));
 		}
 
-		if (value >= (maxVal - warningValue) && value <= maxVal) {
+		if (value >= highTolerance(maxVal, warningVal)) {
 			return (factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_HIGH_WARNING));
 		}
 
 		return (factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_NORMAL));
+	}
+
+	static float highTolerance(float maxVal, float warningVal) {
+		return (maxVal - warningVal);
+	}
+
+	static float lowTolerance(float minVal, float warningVal) {
+		return (minVal + warningVal);
 	}
 }
