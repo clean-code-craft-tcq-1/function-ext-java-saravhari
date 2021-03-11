@@ -61,3 +61,5 @@ Shorten the Semantic distance
 ### Done Items
 
 1) Support a language in addition (German) to English
+
+2) Early Warning

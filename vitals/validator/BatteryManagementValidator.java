@@ -16,18 +16,21 @@ public class BatteryManagementValidator {
 	}
 
 	public static Function<Battery, Boolean> isValidChargeRate = (Battery battery) -> {
-		return checkChargeRate(BatteryManagementFactor.MAX_CHANGE_RATE, battery.chargeRate, BatteryManagementFactor.CHARGE_RATE);
+		return checkChargeRate(BatteryManagementFactor.MAX_CHANGE_RATE, battery.chargeRate,
+				BatteryManagementFactor.CHARGE_RATE);
 	};
 
 	public static Function<Battery, Boolean> isValidStateOfCharge = (Battery battery) -> {
-		if (checkRange(BatteryManagementFactor.MIN_SOC, BatteryManagementFactor.MAX_SOC, battery.soc, BatteryManagementFactor.SOC)) {
+		if (checkRange(BatteryManagementFactor.MIN_SOC, BatteryManagementFactor.MAX_SOC, battery.soc,
+				BatteryManagementFactor.SOC)) {
 			return isValidChargeRate.apply(battery);
 		}
 		return false;
 	};
 
 	public static Boolean isValidTemperature(Battery battery) {
-		if (checkRange(BatteryManagementFactor.MIN_TEMPERATURE, BatteryManagementFactor.MAX_TEMPERATURE, battery.temperature, BatteryManagementFactor.TEMPERATURE)) {
+		if (checkRange(BatteryManagementFactor.MIN_TEMPERATURE, BatteryManagementFactor.MAX_TEMPERATURE,
+				battery.temperature, BatteryManagementFactor.TEMPERATURE)) {
 			return isValidStateOfCharge.apply(battery);
 		}
 		return false;
@@ -38,6 +41,7 @@ public class BatteryManagementValidator {
 			printStatus(factorName, (value > maxVal));
 			return false;
 		}
+		System.out.println(printEarlyWarning(factorName, maxVal, minVal, value));
 		return true;
 	}
 
@@ -46,12 +50,27 @@ public class BatteryManagementValidator {
 			printStatus(factorName, (value > maxVal));
 			return false;
 		}
+		System.out.println(printEarlyWarning(factorName, maxVal, 0, value));
 		return true;
 	}
 
 	static void printStatus(String factorName, boolean isHigh) {
-		System.out.println(factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_OUT_OF_RANGE_STATEMENT)
-				+ " " + (isHigh ? Internationalization.getMessage(BatteryManagementFactor.KEY_HIGH)
-						: Internationalization.getMessage(BatteryManagementFactor.KEY_LOW)));
+		System.out.println(
+				factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_OUT_OF_RANGE_STATEMENT)
+						+ " " + (isHigh ? Internationalization.getMessage(BatteryManagementFactor.KEY_HIGH)
+								: Internationalization.getMessage(BatteryManagementFactor.KEY_LOW)));
+	}
+
+	static String printEarlyWarning(String factorName, float maxVal, float minVal, float value) {
+		float warningValue = (float) ((maxVal * BatteryManagementFactor.TOLERANCE_PERCENTAGE)
+				/ BatteryManagementFactor.MAX_PERCENTAGE);
+
+		if (value >= minVal && value <= (minVal + warningValue)) {
+			return (factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_LOW_WARNING));
+		} else if (value >= (maxVal - warningValue) && value <= maxVal) {
+			return (factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_HIGH_WARNING));
+		}
+
+		return (factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_NORMAL));
 	}
 }
