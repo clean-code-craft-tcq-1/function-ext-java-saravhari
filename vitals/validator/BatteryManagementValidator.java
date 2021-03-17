@@ -10,31 +10,20 @@ public class BatteryManagementValidator {
 	private static boolean isValid = true;
 
 	public static boolean batteryIsOk(float temperature, float soc, float chargeRate) {
+
 		Factor factors[] = { new Factor(BatteryManagementFactor.KEY_SOC, soc),
 				new Factor(BatteryManagementFactor.KEY_TEMPERATURE, temperature),
 				new Factor(BatteryManagementFactor.KEY_CHARGE_RATE, chargeRate) };
 
-		Arrays.asList(factors).parallelStream().forEach(BatteryManagementValidator::validateFactor);
+		Arrays.asList(factors).parallelStream()
+				.forEach(factor -> isValid = (factor.name.equalsIgnoreCase(BatteryManagementFactor.KEY_TEMPERATURE)
+						&& isValidTemperature(factor.value)
+						|| factor.name.equalsIgnoreCase(BatteryManagementFactor.KEY_SOC)
+								&& isValidStateOfCharge(factor.value)
+						|| factor.name.equalsIgnoreCase(BatteryManagementFactor.KEY_CHARGE_RATE)
+								&& isValidChargeRate(factor.value)));
 		return isValid;
 
-	}
-
-	public static void validateFactor(Factor factor) {
-		switch (factor.name) {
-		case BatteryManagementFactor.KEY_TEMPERATURE:
-			isValidTemperature(factor.value);
-			break;
-
-		case BatteryManagementFactor.KEY_SOC:
-			isValidStateOfCharge(factor.value);
-			break;
-
-		case BatteryManagementFactor.KEY_CHARGE_RATE:
-			isValidChargeRate(factor.value);
-			break;
-		default:
-			break;
-		}
 	}
 
 	public static Boolean isValidChargeRate(Float chargeRate) {
@@ -71,7 +60,6 @@ public class BatteryManagementValidator {
 	}
 
 	static void printStatus(String factorName, boolean isHigh) {
-		isValid = false;
 		System.out.println(
 				factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_OUT_OF_RANGE_STATEMENT)
 						+ " " + (isHigh ? Internationalization.getMessage(BatteryManagementFactor.KEY_HIGH)
