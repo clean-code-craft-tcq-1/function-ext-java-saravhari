@@ -1,6 +1,7 @@
 package vitals.validator;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 import vitals.constant.BatteryManagementFactor;
 import vitals.internationalization.Internationalization;
@@ -17,28 +18,33 @@ public class BatteryManagementValidator {
 
 		Arrays.asList(factors).parallelStream().forEach(factor -> {
 			isValidTemperature(factor);
-			isValidStateOfCharge(factor);
-			isValidChargeRate(factor);
 		});
-		return isValid;
 
+		return isValid;
 	}
 
-	public static void isValidChargeRate(Factor factor) {
+	public static Function<Factor, Void> isValidChargeRate = (Factor factor) -> {
 		if (factor.name.equalsIgnoreCase(BatteryManagementFactor.KEY_CHARGE_RATE))
 			checkChargeRate(BatteryManagementFactor.MAX_CHANGE_RATE, factor.value, BatteryManagementFactor.CHARGE_RATE);
+		return null;
 	};
 
-	public static void isValidStateOfCharge(Factor factor) {
-		if (factor.name.equalsIgnoreCase(BatteryManagementFactor.KEY_SOC))
+	public static Function<Factor, Void> isValidStateOfCharge = (Factor factor) -> {
+		if (factor.name.equalsIgnoreCase(BatteryManagementFactor.KEY_SOC)) {
 			checkRange(BatteryManagementFactor.MIN_SOC, BatteryManagementFactor.MAX_SOC, factor.value,
 					BatteryManagementFactor.SOC);
-	}
+			return null;
+		}
+		return isValidChargeRate.apply(factor);
+	};
 
-	public static void isValidTemperature(Factor factor) {
-		if (factor.name.equalsIgnoreCase(BatteryManagementFactor.KEY_TEMPERATURE))
+	public static Void isValidTemperature(Factor factor) {
+		if (factor.name.equalsIgnoreCase(BatteryManagementFactor.KEY_TEMPERATURE)) {
 			checkRange(BatteryManagementFactor.MIN_TEMPERATURE, BatteryManagementFactor.MAX_TEMPERATURE, factor.value,
 					BatteryManagementFactor.TEMPERATURE);
+			return null;
+		}
+		return isValidStateOfCharge.apply(factor);
 	};
 
 	public static Boolean checkRange(float minVal, float maxVal, float value, String factorName) {
