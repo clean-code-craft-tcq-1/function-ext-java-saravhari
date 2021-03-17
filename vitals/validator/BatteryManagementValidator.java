@@ -1,39 +1,55 @@
 package vitals.validator;
 
-import java.util.function.Function;
+import java.util.Arrays;
 
 import vitals.constant.BatteryManagementFactor;
 import vitals.internationalization.Internationalization;
-import vitals.model.Battery;
 
 public class BatteryManagementValidator {
 
+	private static boolean isValid = true;
+
 	public static boolean batteryIsOk(float temperature, float soc, float chargeRate) {
-		Battery battery = new Battery(temperature, soc, chargeRate);
-		if (isValidTemperature(battery))
-			return true;
-		return false;
+		Factor factors[] = { new Factor(BatteryManagementFactor.KEY_SOC, soc),
+				new Factor(BatteryManagementFactor.KEY_TEMPERATURE, temperature),
+				new Factor(BatteryManagementFactor.KEY_CHARGE_RATE, chargeRate) };
+
+		Arrays.asList(factors).parallelStream().forEach(BatteryManagementValidator::validateFactor);
+		return isValid;
+
 	}
 
-	public static Function<Battery, Boolean> isValidChargeRate = (Battery battery) -> {
-		return checkChargeRate(BatteryManagementFactor.MAX_CHANGE_RATE, battery.chargeRate,
+	public static void validateFactor(Factor factor) {
+		switch (factor.name) {
+		case BatteryManagementFactor.KEY_TEMPERATURE:
+			isValidTemperature(factor.value);
+			break;
+
+		case BatteryManagementFactor.KEY_SOC:
+			isValidStateOfCharge(factor.value);
+			break;
+
+		case BatteryManagementFactor.KEY_CHARGE_RATE:
+			isValidChargeRate(factor.value);
+			break;
+		default:
+			break;
+		}
+	}
+
+	public static Boolean isValidChargeRate(Float chargeRate) {
+		return checkChargeRate(BatteryManagementFactor.MAX_CHANGE_RATE, chargeRate,
 				BatteryManagementFactor.CHARGE_RATE);
 	};
 
-	public static Function<Battery, Boolean> isValidStateOfCharge = (Battery battery) -> {
-		if (checkRange(BatteryManagementFactor.MIN_SOC, BatteryManagementFactor.MAX_SOC, battery.soc,
-				BatteryManagementFactor.SOC)) {
-			return isValidChargeRate.apply(battery);
-		}
-		return false;
-	};
+	public static Boolean isValidStateOfCharge(Float soc) {
+		return checkRange(BatteryManagementFactor.MIN_SOC, BatteryManagementFactor.MAX_SOC, soc,
+				BatteryManagementFactor.SOC);
+	}
 
-	public static Boolean isValidTemperature(Battery battery) {
-		if (checkRange(BatteryManagementFactor.MIN_TEMPERATURE, BatteryManagementFactor.MAX_TEMPERATURE,
-				battery.temperature, BatteryManagementFactor.TEMPERATURE)) {
-			return isValidStateOfCharge.apply(battery);
-		}
-		return false;
+	public static Boolean isValidTemperature(Float temperature) {
+		return checkRange(BatteryManagementFactor.MIN_TEMPERATURE, BatteryManagementFactor.MAX_TEMPERATURE, temperature,
+				BatteryManagementFactor.TEMPERATURE);
 	};
 
 	public static Boolean checkRange(float minVal, float maxVal, float value, String factorName) {
@@ -55,6 +71,7 @@ public class BatteryManagementValidator {
 	}
 
 	static void printStatus(String factorName, boolean isHigh) {
+		isValid = false;
 		System.out.println(
 				factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_OUT_OF_RANGE_STATEMENT)
 						+ " " + (isHigh ? Internationalization.getMessage(BatteryManagementFactor.KEY_HIGH)
@@ -82,5 +99,16 @@ public class BatteryManagementValidator {
 
 	static float lowTolerance(float minVal, float warningVal) {
 		return (minVal + warningVal);
+	}
+
+	private static class Factor {
+		private String name;
+		private Float value;
+
+		public Factor(String name, Float value) {
+			super();
+			this.name = name;
+			this.value = value;
+		}
 	}
 }

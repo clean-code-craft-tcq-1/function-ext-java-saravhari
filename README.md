@@ -63,3 +63,5 @@ Shorten the Semantic distance
 1) Support a language in addition (German) to English
 
 2) Early Warning
+
+3) Accumulate the parameters that are crossing thresholds and report them together.

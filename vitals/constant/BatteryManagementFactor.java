@@ -20,7 +20,7 @@ public class BatteryManagementFactor {
 	public final static float MAX_CHANGE_RATE = 0.8f;
 	public final static float TOLERANCE_PERCENTAGE = 5.0f;
 	public final static float MAX_PERCENTAGE = 100.0f;
-	
+
 	public final static String TEMPERATURE = Internationalization.getMessage(KEY_TEMPERATURE);
 	public final static String SOC = Internationalization.getMessage(KEY_SOC);
 	public final static String CHARGE_RATE = Internationalization.getMessage(KEY_CHARGE_RATE);
