@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 import vitals.constant.BatteryManagementFactor;
 import vitals.internationalization.Internationalization;
+import vitals.report.BatteryReport;
 
 public class BatteryManagementValidator {
 
@@ -52,7 +53,7 @@ public class BatteryManagementValidator {
 			printStatus(factorName, (value > maxVal));
 			return false;
 		}
-		System.out.println(printEarlyWarning(factorName, maxVal, minVal, value));
+		BatteryReport.printLog(checkEarlyWarning(factorName, maxVal, minVal, value));
 		return true;
 	}
 
@@ -61,19 +62,19 @@ public class BatteryManagementValidator {
 			printStatus(factorName, (value > maxVal));
 			return false;
 		}
-		System.out.println(printEarlyWarning(factorName, maxVal, 0, value));
+		BatteryReport.printLog(checkEarlyWarning(factorName, maxVal, 0, value));
 		return true;
 	}
 
 	static void printStatus(String factorName, boolean isHigh) {
 		isValid = false;
-		System.out.println(
+		BatteryReport.printLog(
 				factorName + " " + Internationalization.getMessage(BatteryManagementFactor.KEY_OUT_OF_RANGE_STATEMENT)
 						+ " " + (isHigh ? Internationalization.getMessage(BatteryManagementFactor.KEY_HIGH)
 								: Internationalization.getMessage(BatteryManagementFactor.KEY_LOW)));
 	}
 
-	static String printEarlyWarning(String factorName, float maxVal, float minVal, float value) {
+	static String checkEarlyWarning(String factorName, float maxVal, float minVal, float value) {
 		float warningVal = (float) ((maxVal * BatteryManagementFactor.TOLERANCE_PERCENTAGE)
 				/ BatteryManagementFactor.MAX_PERCENTAGE);
 
